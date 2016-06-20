@@ -1,0 +1,9 @@
+a = 3
+b = 3
+
+if a < b:
+	print("a jest mniejsze niz b")
+elif a > b:
+	print("a jest wieksze ni¿ b")
+else:
+	print("sa sobie rowne")

@@ -21,6 +21,10 @@ public class Value {
     public String asString() {
         return String.valueOf(value);
     }
+    
+    public Object getValue() {
+    	return value;
+    }
 
     public boolean isDouble() {
         return value instanceof Double;

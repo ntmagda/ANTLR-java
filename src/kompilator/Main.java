@@ -6,10 +6,10 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        MuLexer lexer = new MuLexer(new ANTLRFileStream("E:\\workspace\\kompilator\\src\\kompilator\\input.txt"));
-        MuParser parser = new MuParser(new CommonTokenStream(lexer));
+        PythonLexer lexer = new PythonLexer(new ANTLRFileStream("E:\\workspace\\kompilator\\src\\kompilator\\input2.txt"));
+        PythonParser parser = new PythonParser(new CommonTokenStream(lexer));
         ParseTree tree = parser.parse();
-        EvalVisitor visitor = new EvalVisitor();
+        ExecVisitor visitor = new ExecVisitor();
         visitor.visit(tree);
     }
 }

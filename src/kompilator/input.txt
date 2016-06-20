@@ -1,14 +1,14 @@
-a = true;
-b = false;
 
-if a && b {
-  log "1 :: a=" + a +", b=" + b;
-}
-else if a || b {
-  log "2 :: a=" + a +", b=" + b;
-}
-else {
-  log "3 :: a=" + a +", b=" + b;
-}
+a = 4
+a = 4
+print( "Done!")
 
-log "Done!";
+if 2 < 4:
+	print("Done!")
+elif 4 >5:
+	print("cokolwiek")
+elif c ==d:
+	c = 6
+else:
+	print("drugi elif ")
+
