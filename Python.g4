@@ -29,7 +29,7 @@ if_stat
  ;
 
 condition_block
- : expr COL loop_stat_block
+ : expr COL loop_stat_block*
  ;
  
 loop_stat_block
@@ -41,7 +41,7 @@ stat_block
  ;
 
 while_stat
- : WHILE expr stat_block
+ : WHILE expr COL loop_stat_block*
  ;
 
 print

@@ -1,0 +1,26 @@
+a = 7
+b = 3
+
+if a < b:
+	print("a jest mniejsze niz b")
+	print("dsfdf")
+	print("dsfdf")
+elif a > b:
+	print("dsfdf")
+	print("dsfdf")
+	print("dsfdf")
+	print("dsfdf")
+	print("dsfdf")
+	print("dsfdf")
+	print("dsfdf")
+else:
+	print("sa sobie rowne")
+
+
+print("____petla_while____")
+print(" ")
+
+
+while(a >b):
+	a = a-1
+	print(a)

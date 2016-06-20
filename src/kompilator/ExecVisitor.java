@@ -6,13 +6,9 @@ import java.util.Map;
 
 public class ExecVisitor extends PythonBaseVisitor<Value> {
 
-    // used to compare floating point numbers
-    public static final double SMALL_VALUE = 0.00000000001;
-
-    // store variables (there's only one global scope!)
     private Map<String, Value> memory = new HashMap<String, Value>();
 
-    // assignment/id overrides
+    // assignment/id 
     @Override
     public Value visitAssignment(PythonParser.AssignmentContext ctx) {
         String id = ctx.ID().getText();
@@ -30,7 +26,7 @@ public class ExecVisitor extends PythonBaseVisitor<Value> {
         return value;
     }
 
-    // atom overrides
+    // atoms 
     @Override
     public Value visitStringAtom(PythonParser.StringAtomContext ctx) {
         String str = ctx.getText();
@@ -80,6 +76,7 @@ public class ExecVisitor extends PythonBaseVisitor<Value> {
     }
 
     @Override
+    // multiplications    
     public Value visitMultiplicationExpr( PythonParser.MultiplicationExprContext ctx) {
 
         Value left = this.visit(ctx.expr(0));
@@ -93,11 +90,12 @@ public class ExecVisitor extends PythonBaseVisitor<Value> {
             case PythonParser.MOD:
                 return new Value(left.asDouble() % right.asDouble());
             default:
-                throw new RuntimeException("unknown operator: " + PythonParser.tokenNames[ctx.op.getType()]);
+                return null;
         }
     }
 
     @Override
+    // additions
     public Value visitAdditiveExpr( PythonParser.AdditiveExprContext ctx) {
 
         Value left = this.visit(ctx.expr(0));
@@ -111,7 +109,7 @@ public class ExecVisitor extends PythonBaseVisitor<Value> {
             case PythonParser.MINUS:
                 return new Value(left.asDouble() - right.asDouble());
             default:
-                throw new RuntimeException("unknown operator: " + PythonParser.tokenNames[ctx.op.getType()]);
+            	return null;
         }
     }
 
@@ -131,7 +129,7 @@ public class ExecVisitor extends PythonBaseVisitor<Value> {
             case PythonParser.GTEQ:
                 return new Value(left.asDouble() >= right.asDouble());
             default:
-                throw new RuntimeException("unknown operator: " + PythonParser.tokenNames[ctx.op.getType()]);
+                return null;
         }
     }
 
@@ -144,14 +142,14 @@ public class ExecVisitor extends PythonBaseVisitor<Value> {
         switch (ctx.op.getType()) {
             case PythonParser.EQ:
                 return left.isDouble() && right.isDouble() ?
-                        new Value(Math.abs(left.asDouble() - right.asDouble()) < SMALL_VALUE) :
+                        new Value(Math.abs(left.asDouble() - right.asDouble()) < 0.00000000001) :
                         new Value(left.equals(right));
             case PythonParser.NEQ:
                 return left.isDouble() && right.isDouble() ?
-                        new Value(Math.abs(left.asDouble() - right.asDouble()) >= SMALL_VALUE) :
+                        new Value(Math.abs(left.asDouble() - right.asDouble()) >= 0.00000000001) :
                         new Value(!left.equals(right));
             default:
-                throw new RuntimeException("unknown operator: " + PythonParser.tokenNames[ctx.op.getType()]);
+               return null;
         }
     }
 
@@ -169,7 +167,7 @@ public class ExecVisitor extends PythonBaseVisitor<Value> {
         return new Value(left.asBoolean() || right.asBoolean());
     }
 
-    // print override
+    // print 
     @Override
     public Value visitPrint(PythonParser.PrintContext ctx) {
         Value value = this.visit(ctx.expr());
@@ -177,7 +175,7 @@ public class ExecVisitor extends PythonBaseVisitor<Value> {
         return value;
     }
 
-    // if override
+    // if 
     @Override
     public Value visitIf_stat(PythonParser.If_statContext ctx) {
 
@@ -186,37 +184,43 @@ public class ExecVisitor extends PythonBaseVisitor<Value> {
         boolean evaluatedBlock = false;
 
         for(PythonParser.Condition_blockContext condition : conditions) {
+        	List<PythonParser.Loop_stat_blockContext> loop_stat_blocks =  condition.loop_stat_block();
 
             Value evaluated = this.visit(condition.expr());
 
             if(evaluated.asBoolean()) {
                 evaluatedBlock = true;
-                // evaluate this block whose expr==true
-                this.visit(condition.loop_stat_block());
+                // wykonuje bloki gdzie expr == true
+                for(PythonParser.Loop_stat_blockContext loop_stat_block : loop_stat_blocks){
+                	this.visit(loop_stat_block);
+                }
                 break;
             }
         }
 
         if(!evaluatedBlock && ctx.loop_stat_block() != null) {
-            // evaluate the else-stat_block (if present == not null)        	
-            this.visit(ctx.loop_stat_block(0));
+            // wykonuje else     
+        	List<PythonParser.Loop_stat_blockContext> loop_stat_blocks =  ctx.loop_stat_block();
+        	for(PythonParser.Loop_stat_blockContext loop_stat_block : loop_stat_blocks){
+            	this.visit(loop_stat_block);
+            }
         }
 
         return Value.VOID;
     }
 
-    // while override
+    // while 
     @Override
     public Value visitWhile_stat(PythonParser.While_statContext ctx) {
-
+    	List<PythonParser.Loop_stat_blockContext> loop_stat_blocks =  ctx.loop_stat_block();
         Value value = this.visit(ctx.expr());
 
         while(value.asBoolean()) {
+        	for(PythonParser.Loop_stat_blockContext loop_stat_block : loop_stat_blocks){
+            	this.visit(loop_stat_block);
+            }
 
-            // evaluate the code block
-            this.visit(ctx.stat_block());
-
-            // evaluate the expression
+            // obliczanie nowej zmiennej
             value = this.visit(ctx.expr());
         }
 
